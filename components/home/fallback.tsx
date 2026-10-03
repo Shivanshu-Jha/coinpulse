@@ -60,3 +60,51 @@ export const TrendingCoinsFallback = () => (
     />
   </div>
 )
+
+const categoryRows = Array.from({ length: 10 }, (_, id) => ({ id }))
+
+const categoryColumns: DataTableColumn<{ id: number }>[] = [
+  {
+    header: 'Category',
+    cell: () => <div className="skeleton category-skeleton" />,
+  },
+  {
+    header: 'Top Gainers',
+    cell: () => (
+      <div className="top-gainers-cell">
+        <div className="skeleton coin-skeleton" />
+        <div className="skeleton coin-skeleton" />
+        <div className="skeleton coin-skeleton" />
+      </div>
+    ),
+  },
+  {
+    header: '24h Change',
+    cell: () => (
+      <div className="change-cell">
+        <div className="skeleton value-skeleton-sm" />
+        <div className="skeleton change-icon" />
+      </div>
+    ),
+  },
+  {
+    header: 'Market Cap',
+    cell: () => <div className="skeleton value-skeleton-lg" />,
+  },
+  {
+    header: '24h Volume',
+    cell: () => <div className="skeleton value-skeleton-md" />,
+  },
+]
+
+export const CategoriesFallback = () => (
+  <div id="categories-fallback" role="status" aria-label="Loading categories">
+    <h4>Top Categories</h4>
+    <DataTable
+      data={categoryRows}
+      columns={categoryColumns}
+      rowKey={(row) => row.id}
+      tableClassName="mt-3"
+    />
+  </div>
+)
