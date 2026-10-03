@@ -4,7 +4,7 @@ import { getCandlestickConfig, getChartConfig, PERIOD_BUTTONS, PERIOD_CONFIG } f
 import { fetcher } from '@/lib/coingecko.actions'
 import { convertOHLCData } from '@/lib/utils'
 import { CandlestickSeries, createChart, IChartApi, ISeriesApi } from 'lightweight-charts'
-import { useEffect, useRef, useState, useTransition } from 'react'
+import { useEffect, useRef, useState } from 'react'
 
 const CandleStickChart = ({
     children,
@@ -20,9 +20,10 @@ const CandleStickChart = ({
 
     const [period, setPeriod] = useState(initialPeriod)
     const [ohlcData, setOhlcData] = useState<OHLCData[]>(data ?? [])
-    const [isPending, startTransition] = useTransition()
+    const [isLoading, setIsLoading] = useState(false)
+    const [error, setError] = useState<string | null>(null)
 
-    const fetchOHLCData = async (selectedPeriod: Period) => {
+    const fetchOHLCData = async (selectedPeriod: Period): Promise<boolean> => {
         try {
             const { days } = PERIOD_CONFIG[selectedPeriod]
 
@@ -33,21 +34,25 @@ const CandleStickChart = ({
             })
 
             setOhlcData(newData ?? [])
+            setError(null)
+            return true
         } catch (e) {
             console.error('Failed to get OHLCData', e)
+            setError('Could not load data for that period. Please try again.')
+            return false
         }
     }
 
-    const handlePeriodChange = (newPeriod: Period) => {
-        if (newPeriod === period) return
+    const handlePeriodChange = async (newPeriod: Period) => {
+        if (newPeriod === period || isLoading) return
 
-        startTransition(async () => {
-            setPeriod(newPeriod)
-            await fetchOHLCData(newPeriod)
-        })
+        setIsLoading(true)
+        const ok = await fetchOHLCData(newPeriod)
+        if (ok) setPeriod(newPeriod) // only switch the active button if data loaded
+        setIsLoading(false)
     }
 
-    // 1. Create the chart once (and rebuild only if height changes)
+    // 1. Create the chart (rebuild only if height changes)
     useEffect(() => {
         const container = chartContainerRef.current
         if (!container) return
@@ -76,7 +81,10 @@ const CandleStickChart = ({
 
     // 2. Push data into the existing chart when data/period changes
     useEffect(() => {
-        if (!candleSeriesRef.current) return
+        if (!candleSeriesRef.current || !chartRef.current) return
+
+        const showTime = ['daily', 'weekly', 'monthly'].includes(period)
+        chartRef.current.applyOptions({ timeScale: { timeVisible: showTime } })
 
         const convertedToSeconds = ohlcData.map((item) =>
             [
@@ -84,11 +92,9 @@ const CandleStickChart = ({
             ] as OHLCData
         )
 
-        const converted = convertOHLCData(convertedToSeconds)
-        candleSeriesRef.current.setData(converted)
-        chartRef.current?.timeScale().fitContent()
-        
-    }, [ohlcData, period])
+        candleSeriesRef.current.setData(convertOHLCData(convertedToSeconds))
+        chartRef.current.timeScale().fitContent()
+    }, [ohlcData, period, height])
 
     return (
         <div id='candlestick-chart'>
@@ -101,13 +107,16 @@ const CandleStickChart = ({
                             key={value}
                             className={period === value ? 'config-button-active' : 'config-button'}
                             onClick={() => handlePeriodChange(value)}
-                            disabled={isPending}
+                            disabled={isLoading}
                         >
                             {label}
                         </button>
                     ))}
                 </div>
             </div>
+            {error && (
+                <p className="text-sm text-red-400 px-2 pb-2" role="alert">{error}</p>
+            )}
             <div ref={chartContainerRef} className="chart" style={{ height }} />
         </div>
     )
