@@ -80,20 +80,40 @@ Upgrading to a paid plan unlocks WebSockets and full history, and the app can be
 
 ## 🗂 Project Structure
 ```text
-app/
-├── page.tsx              # Home: overview, trending, categories
-├── coins/
-│   ├── page.tsx          # Paginated coins table
-│   └── [id]/page.tsx     # Coin details page
-components/
-├── CandleStickChart.tsx  # Interactive chart with period buttons
-├── CoinConverter.tsx     # Coin <-> USD converter
-├── SearchModal.tsx       # Command palette search
-├── DataTable.tsx         # Generic reusable table
-└── home/                 # Home page sections
-lib/
-├── coingecko.actions.ts  # Server-side API fetcher
-└── utils.ts              # Formatting helpers
+coinpulse/
+├── app/
+│   ├── layout.tsx                # Root layout with the site Header
+│   ├── page.tsx                  # Home: coin overview, trending coins, categories
+│   ├── globals.css               # Theme tokens and component styles
+│   ├── favicon.ico
+│   └── coins/
+│       ├── page.tsx              # Paginated "All Coins" table
+│       └── [id]/
+│           └── page.tsx          # Coin details page
+├── components/
+│   ├── Header.tsx                # Logo, navigation links, search entry point
+│   ├── SearchModal.tsx           # Command palette (Ctrl/Cmd + K) with trending coins
+│   ├── CandleStickChart.tsx      # Lightweight Charts candlestick with period buttons
+│   ├── CoinConverter.tsx         # Coin <-> USD converter
+│   ├── CoinsPagination.tsx       # Pagination controls for the coins table
+│   ├── DataTable.tsx             # Generic reusable table
+│   ├── home/
+│   │   ├── CoinOverview.tsx      # Bitcoin overview with chart
+│   │   ├── TrendingCoins.tsx     # Trending coins table
+│   │   ├── Categories.tsx        # Top categories table
+│   │   └── fallback.tsx          # Loading placeholders (Suspense fallbacks)
+│   └── ui/                       # Shadcn UI components (button, command, dialog, ...)
+├── lib/
+│   ├── coingecko.actions.ts      # Server-side CoinGecko fetcher and API helpers
+│   └── utils.ts                  # cn, formatCurrency, formatPercentage, OHLC conversion
+├── constants.ts                  # Period buttons and config, chart options
+├── public/                       # Static assets and screenshots
+├── components.json               # Shadcn UI configuration
+├── next.config.ts                # Next.js config (remote image hosts)
+├── postcss.config.mjs            # Tailwind CSS v4 via PostCSS
+├── eslint.config.mjs
+├── tsconfig.json
+└── package.json
 ```
 
 
