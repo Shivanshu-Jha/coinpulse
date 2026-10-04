@@ -36,3 +36,14 @@ export async function fetcher<T>(
 
     return response.json()
 }
+
+export async function searchCoins(query: string): Promise<SearchCoin[]> {
+    const normalizedQuery = query.trim()
+    if (!normalizedQuery) return []
+
+    const result = await fetcher<{ coins: SearchCoin[] }>('/search', {
+        query: normalizedQuery,
+    })
+
+    return result.coins ?? []
+}
