@@ -142,7 +142,7 @@ export const SearchModal = ({
                 <Command shouldFilter={false}>
                     <div className='cmd-input'>
                         <CommandInput
-                            placeholder='Search for a token by name or symbol...'
+                            placeholder='Search for a coin by name...'
                             value={searchQuery}
                             onValueChange={setSearchQuery}
                         />
