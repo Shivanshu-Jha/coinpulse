@@ -1,122 +1,128 @@
 # CoinPulse 📈
-A **crypto market dashboard** built with **Next.js 16**, **TypeScript**, **Tailwind CSS**, **Shadcn UI**, **Lightweight Charts**, and the **CoinGecko API**.
 
-CoinPulse lets users track prices, explore candlestick charts, browse every coin with pagination, search instantly, and dive into detailed coin pages, all running on the **free CoinGecko Demo plan**.
+A cryptocurrency tracking web app built with **Next.js** that shows market data, trending coins, categories, price charts and a coin converter, powered by the **CoinGecko API**.
 
-Check it out here: [coinpulse](https://coinpulse-kappa-six.vercel.app/)
+**🌐 Live Demo:** [coinpulse](https://coinpulse-kappa-six.vercel.app/)
+---
+
+## ✨ Features
+
+- 🏠 **Market overview** on the home page: coin overview, trending coins and top categories
+- 🪙 **Coins list** with a data table and pagination
+- 🔍 **Search modal** to quickly find any coin
+- 📄 **Coin detail pages** (`/coins/[id]`) with market data for each coin
+- 🕯️ **Candlestick price chart** for price history
+- 💱 **Coin converter** to convert between a coin and currencies
+- ⏳ **Loading fallbacks** while data is being fetched
+- 📱 **Responsive UI** with Tailwind CSS and Shadcn UI
 
 ---
 
-## 🚀 Features
-- **Market Overview** – Bitcoin price, 24h change, and an interactive candlestick chart on the home page
-- **Candlestick Charts** – switch between time periods (1D, 1W, 1M, and more) powered by Lightweight Charts
-- **Trending Coins** – see what the market is talking about right now
-- **Top Categories** – browse the biggest crypto categories at a glance
-- **All Coins** – paginated market table with rank, price, 24h change, and market cap
-- **Coin Details** – per-coin page with chart, market stats, links, about section, and top exchange listings
-- **Coin Converter** – convert between a coin and USD in either direction
-- **Quick Search** – command palette (`Ctrl/Cmd + K`) with debounced search and trending suggestions
+## 🛠️ Tech Stack
 
----
-
-## 🛠 Tech Stack
 | Technology | Usage |
-|------------|-------|
-| Next.js 16 | App framework with App Router and Server Components |
-| TypeScript | Strong typing & safety |
-| CoinGecko API (Demo) | Market data, OHLC, search, and trending coins |
-| Lightweight Charts | Candlestick charts |
-| Shadcn UI + cmdk | Command palette and dialog components |
-| SWR | Client-side data fetching for search |
-| Tailwind CSS v4 | Styling & responsive design |
-| Lucide React | Icons |
+| --- | --- |
+| Next.js (App Router) | Framework: routing, server rendering and data fetching |
+| TypeScript | Type safety |
+| CoinGecko API | Cryptocurrency market data |
+| Tailwind CSS | Styling and responsive design |
+| Shadcn UI | UI components (dialog, command, table, pagination, input) |
 
 ---
 
-## ⚙️ Installation & Setup
+## 🏗️ Architecture
 
-1. **Clone the repo**
-   ```bash
-   git clone https://github.com/Shivanshu-Jha/coinpulse.git
-   cd coinpulse
-   ```
+```
+ Browser
+   │
+   ▼
+ Next.js App Router (server components + client components)
+   │
+   ├── app/page.tsx            → Home: CoinOverview, TrendingCoins, Categories
+   ├── app/coins/page.tsx      → Coins table with pagination
+   └── app/coins/[id]/page.tsx → Coin details, candlestick chart, converter
+   │
+   ▼
+ lib/coingecko.actions.ts      → Server-side functions that call the CoinGecko API
+   │
+   ▼
+ CoinGecko API
+```
 
-2. **Install dependencies**
-   ```bash
-   npm install
-   ```
-
-3. **Set up environment variables**
-
-   Create a `.env.local` file in the project root:
-   ```bash
-   COINGECKO_BASE_URL=https://api.coingecko.com/api/v3
-   COINGECKO_API_KEY=your_coingecko_demo_api_key
-   ```
-
-4. **Run the dev server**
-   ```bash
-   npm run dev
-   ```
+**Data flow:** pages and components call the functions in `lib/coingecko.actions.ts` on the server, so the API key and base URL stay out of the browser. The data is passed to UI components (`DataTable`, `CandleStickChart`, `CoinConverter`), while interactive parts like search and the converter run as client components.
 
 ---
 
-## 🔌 How the Data Works
-- All requests go through a single server-side `fetcher` that attaches the API key header and caches responses for **60 seconds**
-- Pages are server-rendered, so the API key is never exposed to the browser
-- Chart period changes and search are the only client-triggered requests
+## 📁 Project Structure
 
-### Demo plan limitations
-| Limit | What it means for CoinPulse |
-|-------|-----------------------------|
-| No WebSockets | Prices are **not live**; they refresh on page load (cached up to 60s) |
-| 365 days of history | The longest chart period is capped at 1 year |
-| ~30 requests/minute | Heavy use can return a `429` error; wait a minute and retry |
-| No custom `interval` on OHLC | Candle size is chosen automatically from the selected period |
-
-Upgrading to a paid plan unlocks WebSockets and full history, and the app can be extended without changing its structure.
-
----
-
-## 🗂 Project Structure
-```text
+```
 coinpulse/
 ├── app/
-│   ├── layout.tsx                # Root layout with the site Header
-│   ├── page.tsx                  # Home: coin overview, trending coins, categories
-│   ├── globals.css               # Theme tokens and component styles
-│   ├── favicon.ico
+│   ├── layout.tsx
+│   ├── page.tsx                 # Home page
+│   ├── globals.css
 │   └── coins/
-│       ├── page.tsx              # Paginated "All Coins" table
-│       └── [id]/
-│           └── page.tsx          # Coin details page
+│       ├── page.tsx             # All coins list
+│       └── [id]/page.tsx        # Single coin page
 ├── components/
-│   ├── Header.tsx                # Logo, navigation links, search entry point
-│   ├── SearchModal.tsx           # Command palette (Ctrl/Cmd + K) with trending coins
-│   ├── CandleStickChart.tsx      # Lightweight Charts candlestick with period buttons
-│   ├── CoinConverter.tsx         # Coin <-> USD converter
-│   ├── CoinsPagination.tsx       # Pagination controls for the coins table
-│   ├── DataTable.tsx             # Generic reusable table
-│   ├── home/
-│   │   ├── CoinOverview.tsx      # Bitcoin overview with chart
-│   │   ├── TrendingCoins.tsx     # Trending coins table
-│   │   ├── Categories.tsx        # Top categories table
-│   │   └── fallback.tsx          # Loading placeholders (Suspense fallbacks)
-│   └── ui/                       # Shadcn UI components (button, command, dialog, ...)
+│   ├── home/                    # CoinOverview, TrendingCoins, Categories, fallback
+│   ├── CandleStickChart.tsx     # Price chart
+│   ├── CoinConverter.tsx        # Currency converter
+│   ├── CoinsPagination.tsx      # Pagination controls
+│   ├── DataTable.tsx            # Reusable table
+│   ├── Header.tsx
+│   ├── SearchModal.tsx          # Command-palette style search
+│   └── ui/                      # Shadcn UI primitives
 ├── lib/
-│   ├── coingecko.actions.ts      # Server-side CoinGecko fetcher and API helpers
-│   └── utils.ts                  # cn, formatCurrency, formatPercentage, OHLC conversion
-├── constants.ts                  # Period buttons and config, chart options
-├── public/                       # Static assets and screenshots
-├── components.json               # Shadcn UI configuration
-├── next.config.ts                # Next.js config (remote image hosts)
-├── postcss.config.mjs            # Tailwind CSS v4 via PostCSS
-├── eslint.config.mjs
-├── tsconfig.json
-└── package.json
+│   ├── coingecko.actions.ts     # CoinGecko API calls
+│   └── utils.ts
+├── constants.ts                 # App constants
+├── type.d.ts                    # Shared TypeScript types
+└── next.config.ts
+```
+
+---
+
+## ⚙️ Getting Started
+
+### Prerequisites
+- Node.js 18+
+- A [CoinGecko API key](https://www.coingecko.com/en/api) (a free demo key works)
+
+### 1. Clone the repo
+
+```bash
+git clone https://github.com/Shivanshu-Jha/CoinPulse.git
+cd CoinPulse
+```
+
+### 2. Install dependencies
+
+```bash
+npm install
+```
+
+### 3. Set up environment variables
+
+Create `.env.local` in the root:
+
+```env
+# Names below are examples; make sure they match the ones used in your code
+COINGECKO_BASE_URL=https://api.coingecko.com/api/v3
+COINGECKO_API_KEY=your_coingecko_api_key
 ```
 
 
+### 4. Run the dev server
+
+```bash
+npm run dev
+```
+
+
+
+
+---
 
 ## 📸 Screenshots
 ### Home dashboard with candlestick chart
